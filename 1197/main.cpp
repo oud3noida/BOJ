@@ -4,12 +4,23 @@
 
 using namespace std;
 
+struct edge {
+    int cost, a, b;
+    
+    edge(int c, int i, int j) : cost(c), a(i), b(j) {}
+};
+
+bool operator<(edge const& a, edge const& b) {
+    return a.cost < b.cost;
+}
+
+const int MAX = 10000;
 int V, E, totalCost;
-vector<pair<int, pair<int, int>>> edges; // (cost, end1, end2)
+vector<edge> edges;
 
 class unionFind {
     private:
-    int parent[10000], rank[10000];
+    int parent[MAX], rank[MAX];
     
     public:
     unionFind(int size) {
@@ -43,23 +54,20 @@ int main()
     int a, b, c;
     for (int i=0; i<E; i++) {
         cin >> a >> b >> c;
-        edges.push_back(make_pair(c, make_pair(a-1, b-1)));
+        edges.push_back(edge(c, a-1, b-1));
     }
     sort(edges.begin(), edges.end());
     
     unionFind vertices(V);
     totalCost = 0;
-    auto e = edges.begin();
+    auto cur = --edges.begin();
     for (int cnt=0; cnt<V-1;) {
-        a = e->second.first;
-        b = e->second.second;
-        c = e->first;
-        ++e;
+        ++cur;
         
-        if (vertices.find(a) == vertices.find(b)) continue;
+        if (vertices.find(cur->a) == vertices.find(cur->b)) continue;
         
-        vertices.merge(a, b);
-        totalCost += c;
+        vertices.merge(cur->a, cur->b);
+        totalCost += cur->cost;
         cnt++;
     }
     
