@@ -30,7 +30,7 @@ int main()
     for (int bldg=1; bldg<8; bldg++) route[0][bldg] = 0;
     
     cin >> d;
-    // Calculate the number of ways to be at building 'bldg' in time 't'
+    // Calculate the number of ways to be in building 'bldg' at time 't'
     for (int t=1; t<=d; t++) {
         for (int bldg=0; bldg<8; bldg++) {
             route[t][bldg] = 0;
