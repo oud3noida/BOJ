@@ -33,7 +33,7 @@ void meltIce() {
     vector<vector<bool>> visited(Y, vector<bool>(X, false));
     
     // Update ice cells in the queue into water cells
-    //   (hereinafter 'molten ice cells')
+    //   (Hereinafter we call these cells 'molten ice cells')
     while (!iceQ.empty()) {
         intPair cur = iceQ.front(); iceQ.pop();
         int x = cur.first,
@@ -57,7 +57,7 @@ void meltIce() {
             if (!inRange(xNext, yNext)) continue;
             
             // If an ice cell is adjacent to the molten ice cell,
-            //   store it in the queue
+            //   store it into the queue
             if (lake[yNext][xNext] == 'X') {
                 if (visited[yNext][xNext]) continue;
                 tmpQ.push(make_pair(xNext, yNext));
