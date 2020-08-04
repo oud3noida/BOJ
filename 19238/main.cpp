@@ -48,7 +48,7 @@ int findDistance(const Pos &from, const Pos &to) {
             Pos adjPos = Pos(curPos.x + DX[i], curPos.y + DY[i]);
             if (!inRange(adjPos)) continue;
             if (visited[adjPos.y-1][adjPos.x-1]) continue;
-            if (world[adjPos.y-1][adjPos.x-1]) continue;
+            if (world[adjPos.y-1][adjPos.x-1] == 1) continue;
             visited[adjPos.y-1][adjPos.x-1] = true;
             q.push(make_pair(adjPos, curDst+1));
         }
@@ -61,47 +61,60 @@ bool comp(int a, int b) {
     return customers[a] < customers[b];
 }
 
-int driveTaxi() {
-    vector<bool> completed(numCustomer, false);
+int findNearestCustomer(int &retDst) {
+    vector<vector<bool>> visited(N, vector<bool>(N, false));
+    queue<pair<Pos, int>> q;
+    q.push(make_pair(taxi, 0));
+    visited[taxi.y-1][taxi.x-1] = true;
     
-    for (int count=0; count<numCustomer; ++count) {
-        // Find the nearest customers
-        vector<int> candidates;
-        int dst = INF;
-        for (int i=0; i<numCustomer; ++i) {
-            if (completed[i]) continue;
-            
-            int curDst = findDistance(taxi, customers[i]);
-            
-            // If failed to get to the customer, stop driving
-            if (curDst == -1) return -1;
-            
-            if (dst == INF) {
-                candidates.push_back(i);
-                dst = curDst;
-            } else if (curDst == dst) {
-                candidates.push_back(i);
-            } else if (curDst < dst) {
-                candidates.clear();
-                candidates.push_back(i);
-                dst = curDst;
-            }
+    vector<int> ret;
+    
+    while (!q.empty()) {
+        auto cur = q.front(); q.pop();
+        Pos curPos = cur.first;
+        int curDst = cur.second;
+        
+        if (curDst > retDst) break;
+        
+        if (world[curPos.y-1][curPos.x-1] > 1) {
+            if (retDst == INF) retDst = curDst;
+            ret.push_back(world[curPos.y-1][curPos.x-1] - 2);
         }
         
-        // Tie-break
-        sort(candidates.begin(), candidates.end(), comp);
-        int cur = candidates.front();
+        for (int i=0; i<4; ++i) {
+            Pos adjPos = Pos(curPos.x + DX[i], curPos.y + DY[i]);
+            if (!inRange(adjPos)) continue;
+            if (visited[adjPos.y-1][adjPos.x-1]) continue;
+            if (world[adjPos.y-1][adjPos.x-1] == 1) continue;
+            visited[adjPos.y-1][adjPos.x-1] = true;
+            q.push(make_pair(adjPos, curDst+1));
+        }
+    }
+    
+    if (retDst == INF) return -1;
+    
+    sort(ret.begin(), ret.end(), comp);
+    return ret.front();
+}
+
+int driveTaxi() {
+    for (int count=0; count<numCustomer; ++count) {
+        // Find the next customer
+        int dst = INF;
+        int cur = findNearestCustomer(dst);
+        if (cur == -1) return -1;
         
         // Drive the customer to the destination
         int reward = findDistance(customers[cur], destinations[cur]);
         fuel -= dst + reward;
         taxi = destinations[cur];
+        if (reward == -1) return -1;
+        
+        world[customers[cur].y-1][customers[cur].x-1] = 0;
         
         // Check and charge fuel
         if (fuel < 0) return -1;
         fuel += reward*2;
-        
-        completed[cur] = true;
     }
     
     return fuel;
@@ -124,6 +137,7 @@ int main()
     for (int i=0; i<numCustomer; ++i) {
         cin >> customers[i].y >> customers[i].x;
         cin >> destinations[i].y >> destinations[i].x;
+        world[customers[i].y-1][customers[i].x-1] = i+2;
     }
     
     cout << driveTaxi();
