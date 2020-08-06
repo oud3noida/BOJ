@@ -6,20 +6,24 @@ using namespace std;
 
 struct Position {
     int x, y;
-    Position(int x=30, int y=30) : x(x), y(y) {}
+    bool playing;
+    Position(int x=30, int y=30, bool playing=false)
+    : x(x), y(y), playing(playing) {}
     
     Position operator+(const Position& other) const {
-        return Position(x + other.x, y + other.y);
+        return Position(x + other.x, y + other.y, playing || other.playing);
     }
     
     bool operator==(const Position& other) const {
-        return (x == other.x) && (y == other.y);
+        return (x == other.x) && (y == other.y) && (playing == other.playing);
     }
 };
 
 const int PIECE_X[4] = {0, 0, 1, 1},
           PIECE_Y[4] = {0, 1, 0, 1};
-const Position POS_START = Position();
+const Position POS_START = Position(),
+               POS_END = Position(30, 30, true),
+               POS_OUT = Position(-1, -1);
 int N;
 Position pos[8];
 char board[32][33] = {
@@ -90,20 +94,34 @@ bool inRange(Position &p) {
     return 0 <= p.x && p.x <= 30 && 0 <= p.y && p.y <= 30;
 }
 
-void changePiecePos(Position &p, Position delta, int times) {
-    while (inRange(p) && times-- > 0) {
-        p = p + delta;
-    }
-}
+void printBoard();
 
 void movePiece(char piece, int times) {
     int pieceID = piece2num(piece);
-    changePiecePos(pos[pieceID], Position(-6, 0), times);
+    Position &curPos = pos[pieceID];
+    while (inRange(curPos) && times-- > 0) {
+        if (!curPos.playing) {
+            curPos.playing = true;
+            curPos = curPos + Position(-6, 0);
+            continue;
+        }
+        
+        if (curPos == POS_END) // END
+            curPos = POS_OUT;
+        else if (curPos.x == 30) // NAL-DO ~ NAL-YUT
+            curPos = curPos + Position(0, 6);
+        else if (curPos.y == 0) // JJEOL-DO ~ JJEOL-YUT
+            curPos = curPos + Position(6, 0);
+        else if (curPos.x == 0) // DWIT-DO ~ DWIT-YUT
+            curPos = curPos + Position(0, -6);
+        else if (curPos.y == 30) // DO ~ YUT
+            curPos = curPos + Position(-6, 0);
+    }
 }
 
 void printBoard() {
     for (int i=0; i<8; ++i) {
-        if (pos[i] == POS_START) continue;
+        if (pos[i] == POS_START || pos[i] == POS_OUT) continue;
         board[pos[i].x + PIECE_X[i%4]][pos[i].y + PIECE_Y[i%4]] = num2piece(i);
     }
     
