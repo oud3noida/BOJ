@@ -117,17 +117,28 @@ vector<int> enemy(int id) {
 void movePiece(char piece, int times) {
     int pieceID = find(piece2num(piece));
     Position &curPos = pos[pieceID];
+    
+    if (!curPos.playing) {
+        curPos.playing = true;
+        curPos = curPos + Position(-6, 0);
+        --times;
+    }
+    
+    int shortcut = 0;
+    if (curPos.x - curPos.y == 0)
+        shortcut = 2;
+    else if (curPos.x + curPos.y == 30)
+        shortcut = 1;
+    
     while (inRange(curPos) && times-- > 0) {
-        if (!curPos.playing) {
-            curPos.playing = true;
-            curPos = curPos + Position(-6, 0);
-            continue;
-        }
-        
         if (curPos == POS_END) // END
             curPos = POS_OUT;
         else if (curPos.x == 30) // NAL-DO ~ NAL-YUT
             curPos = curPos + Position(0, 6);
+        else if (shortcut == 1) // AP-MO-DO ~ SOK-MO
+            curPos = curPos + Position(5, -5);
+        else if (shortcut == 2) // DWIT-MO-DO ~ AN-JJEO
+            curPos = curPos + Position(5, 5);
         else if (curPos.y == 0) // JJEOL-DO ~ JJEOL-YUT
             curPos = curPos + Position(6, 0);
         else if (curPos.x == 0) // DWIT-DO ~ DWIT-YUT
