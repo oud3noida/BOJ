@@ -24,7 +24,10 @@ const int PIECE_X[4] = {0, 0, 1, 1},
 const Position POS_START = Position(),
                POS_END = Position(30, 30, true),
                POS_OUT = Position(-1, -1);
+const vector<int> TEAM_UPPER = {0, 1, 2, 3},
+                  TEAM_LOWER = {4, 5, 6, 7};
 int N;
+int parent[8];
 Position pos[8];
 char board[32][33] = {
 "..----..----..----..----..----..",     // (0,0)  (0,6)  (0,12)  (0,18)  (0,24)  (0,30)
@@ -60,6 +63,15 @@ char board[32][33] = {
 "..    ..    ..    ..    ..    ..",     // (30,0) (30,6) (30,12) (30,18) (30,24) (30,30)
 "..----..----..----..----..----.."};
 
+int find(int i) {
+    if (i != parent[i]) return parent[i] = find(parent[i]);
+    return i;
+}
+
+void merge(int a, int b) {
+    parent[find(a)] = find(b);
+}
+
 char num2piece(int n) {
     // 0 1 2 3 4 5 6 7
     // A B C D a b c d
@@ -94,10 +106,16 @@ bool inRange(Position &p) {
     return 0 <= p.x && p.x <= 30 && 0 <= p.y && p.y <= 30;
 }
 
-void printBoard();
+vector<int> ally(int id) {
+    return (id/4 == 0) ? TEAM_UPPER : TEAM_LOWER;
+}
+
+vector<int> enemy(int id) {
+    return (id/4 == 0) ? TEAM_LOWER : TEAM_UPPER;
+}
 
 void movePiece(char piece, int times) {
-    int pieceID = piece2num(piece);
+    int pieceID = find(piece2num(piece));
     Position &curPos = pos[pieceID];
     while (inRange(curPos) && times-- > 0) {
         if (!curPos.playing) {
@@ -117,12 +135,19 @@ void movePiece(char piece, int times) {
         else if (curPos.y == 30) // DO ~ YUT
             curPos = curPos + Position(-6, 0);
     }
+    
+    // Union with ally pieces
+    for (int allyID : ally(pieceID)) {
+        if (pos[find(allyID)] == curPos)
+            merge(allyID, pieceID);
+    }
 }
 
 void printBoard() {
     for (int i=0; i<8; ++i) {
-        if (pos[i] == POS_START || pos[i] == POS_OUT) continue;
-        board[pos[i].x + PIECE_X[i%4]][pos[i].y + PIECE_Y[i%4]] = num2piece(i);
+        Position iPos = pos[find(i)];
+        if (iPos == POS_START || iPos == POS_OUT) continue;
+        board[iPos.x + PIECE_X[i%4]][iPos.y + PIECE_Y[i%4]] = num2piece(i);
     }
     
     for (auto &row : board) cout << row << "\n";
@@ -132,7 +157,10 @@ int main()
 {
     ios_base::sync_with_stdio(false); cin.tie(NULL);
     
-    for (int i=0; i<8; ++i) pos[i] = Position();
+    for (int i=0; i<8; ++i) {
+        parent[i] = i;
+        pos[i] = Position();
+    }
     
     cin >> N;
     
