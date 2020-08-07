@@ -152,6 +152,17 @@ void movePiece(char piece, int times) {
         if (pos[find(allyID)] == curPos)
             merge(allyID, pieceID);
     }
+    
+    // Capture enemy pieces
+    vector<int> captured;
+    for (int enemyID : enemy(pieceID)) {
+        if (pos[find(enemyID)] == curPos)
+            captured.push_back(enemyID);
+    }
+    for (int capturedID : captured) {
+        parent[capturedID] = capturedID;
+        pos[capturedID] = POS_START;
+    }
 }
 
 void printBoard() {
