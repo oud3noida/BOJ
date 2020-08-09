@@ -17,14 +17,6 @@ struct Vector3 {
         return z < other.z;
     }
     
-    bool operator==(const Vector3& other) const {
-        return (x == other.x) && (y == other.y) && (z == other.z);
-    }
-    
-    Vector3 operator+(const Vector3& other) const {
-        return Vector3(x+other.x, y+other.y, z+other.z);
-    }
-    
     Vector3 operator-(const Vector3& other) const {
         return Vector3(x-other.x, y-other.y, z-other.z);
     }
@@ -33,33 +25,32 @@ struct Vector3 {
         return Vector3(x*v, y*v, z*v);
     }
     
-    double norm_squared() {
+    double norm_squared() const {
         return x*x + y*y + z*z;
     }
     
-    double norm() {
+    double norm() const {
         return sqrt(norm_squared());
     }
     
-    int dot(const Vector3& other) const {
+    double dot(const Vector3& other) const {
         return x*other.x + y*other.y + z*other.z;
     }
     
-    Vector3 normalize() {
-        return Vector3(x, y, z) * (1/norm());
+    double cross(const Vector3& other) const {
+        double aabb = norm_squared() * other.norm_squared();
+        double abab = dot(other) * dot(other);
+        return sqrt(fabs(aabb - abab));
     }
     
-    bool perpendicularFoot(Vector3 a, Vector3 b, Vector3& p) const {
+    bool isPerpFootOnSegment(Vector3 a, Vector3 b) const {
         /*
-            Returns a perpendicular foot 'p' on a line segment with endpoints 'a' and 'b'.
-            If a perpendicular foot lies on the line segment, returns true.
-            Otherwise, returns false.
+            Returns true if there exists a perpendicular foot from this point
+             to a line segment with endpoints 'a' and 'b'.
+            Otherwise returns false.
         */
-        if (b < a) swap(a, b);
         Vector3 c = Vector3(x, y, z);
-        p = (b-a).normalize() * ((c-a).dot(b-a) * 1/(b-a).norm()) + a;
-        if (p < a || b < p) return false;
-        return true;
+        return (c-a).dot(b-a) * (c-b).dot(a-b) > -1*EPSILON;
     }
 };
 
@@ -68,13 +59,8 @@ double distance_point_segment(Vector3 p, Vector3 a, Vector3 b) {
         Returns a distance between a point 'p'
          and a line segment with endpoints 'a' and 'b'.
     */
-    if (b < a) swap(a, b);
-    Vector3 p_ab;
-    if (p.perpendicularFoot(a, b, p_ab)) {
-        double distance_squared = (p-a).norm_squared() - (p_ab-a).norm_squared();
-        if (distance_squared < EPSILON) return 0;
-        return sqrt(distance_squared);
-    }
+    if (p.isPerpFootOnSegment(a, b))
+        return fabs((b-a).cross(p-a)) / (b-a).norm();
     return min((p-a).norm(), (p-b).norm());
 }
 
