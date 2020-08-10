@@ -55,7 +55,9 @@ int intersection_seg_seg(const Segment& ab, const Segment& cd) {
     Vector2 a = ab.first, b = ab.second,
             c = cd.first, d = cd.second;
     
-    int ccw_ab = ccw(a, b, c) * ccw(a, b, d),
+    int ccw_abc = ccw(a, b, c),
+        ccw_abd = ccw(a, b, d),
+        ccw_ab = ccw_abc * ccw_abd,
         ccw_cd = ccw(c, d, a) * ccw(c, d, b);
     
     if (ccw_abc == 0 && ccw_abd == 0) {
