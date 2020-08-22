@@ -3,22 +3,23 @@
 
 using namespace std;
 
-int N, maxPrice;
+int N;
 vector<int> limit, price;
 
-bool solve(int cur, long long money, bool passed) {
+bool solve(int cur, long long money, bool passed, int maxPrice) {
     if (cur == N) return true;
     
     if (cur > 0) maxPrice = max(maxPrice, price[cur-1]);
     if (money > limit[cur]) {
         if (passed) return false;
+        
         if (money - maxPrice > limit[cur])
-            return solve(cur+1, money, true);
+            return solve(cur+1, money, true, maxPrice);
         else
-            return solve(cur+1, money - maxPrice + price[cur], true)
-                || solve(cur+1, money, true);
+            return solve(cur+1, money - maxPrice + price[cur], true, maxPrice)
+                || solve(cur+1, money, true, maxPrice);
     }
-    return solve(cur+1, money + price[cur], passed);
+    return solve(cur+1, money + price[cur], passed, maxPrice);
 }
 
 int main()
@@ -34,9 +35,8 @@ int main()
         cin >> x;
         price.push_back(x);
     }
-    maxPrice = 0;
     
-    cout << (solve(0, 0, false) ? "Kkeo-eok" : "Zzz");
+    cout << (solve(0, 0, false, 0) ? "Kkeo-eok" : "Zzz");
     
     return 0;
 }
