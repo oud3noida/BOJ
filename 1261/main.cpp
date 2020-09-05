@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <set>
 
 using namespace std;
 
@@ -9,23 +10,10 @@ const int DX[4] = {0, 1, 0, -1},
 int X, Y;
 vector<vector<bool>> isWall;
 vector<vector<int>> minBroken;
+set<pair<int, pair<int, int>>> pq;
 
 bool inRange(int x, int y) {
     return 0 <= x && x < X && 0 <= y && y < Y;
-}
-
-void explore(int x, int y, int curBroken) {
-    if (curBroken >= minBroken[y][x]) return;
-    minBroken[y][x] = curBroken;
-    
-    if (x == X-1 && y == Y-1) return;
-    
-    for (int d=0; d<4; ++d) {
-        int xNext = x + DX[d],
-            yNext = y + DY[d];
-        if (!inRange(xNext, yNext)) continue;
-        explore(xNext, yNext, curBroken + (isWall[yNext][xNext] ? 1 : 0));
-    }
 }
 
 int main()
@@ -44,7 +32,26 @@ int main()
         }
     }
     
-    explore(0, 0, 0);
+    pq.insert(make_pair(0, make_pair(0, 0)));
+    while (!pq.empty()) {
+        int curBroken = pq.begin()->first,
+            x = pq.begin()->second.first,
+            y = pq.begin()->second.second;
+        pq.erase(pq.begin());
+        
+        if (curBroken >= minBroken[y][x]) continue;
+        minBroken[y][x] = curBroken;
+        
+        if (x == X-1 && y == Y-1) continue;
+        
+        for (int d=0; d<4; ++d) {
+            int xNext = x + DX[d],
+                yNext = y + DY[d];
+            if (!inRange(xNext, yNext)) continue;
+            int nextBroken = curBroken + (isWall[yNext][xNext] ? 1 : 0);
+            pq.insert(make_pair(nextBroken, make_pair(xNext, yNext)));
+        }
+    }
     
     cout << minBroken[Y-1][X-1];
     
