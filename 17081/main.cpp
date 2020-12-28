@@ -52,7 +52,7 @@ public:
 
     Monster(string name, int attack, int defense, int health, int xp, ObjectType type = tMonster) :
             Object(type), name(std::move(name)),
-            attack(attack), defense(defense), health(health), max_health(health), xp(xp) {}
+            health(health), max_health(health), attack(attack), defense(defense), xp(xp) {}
 
     int damage(int op_defense) override {
         return max(1, attack - op_defense);
@@ -106,8 +106,8 @@ public:
     Buff accessory;
 
     Player(int x, int y)
-            : x(x), y(y),
-              x_init(x), y_init(y),
+            : x_init(x), y_init(y),
+              x(x), y(y),
               health(20), max_health(20), attack(2), defense(2),
               level(1), xp(0),
               weapon(0), armor(0),
@@ -284,7 +284,7 @@ private:
         dUp, dDown, dLeft, dRight
     };
     string commands;
-    int turn;
+    unsigned int turn;
 
     static Direction decrypt_direction(char direction_char) {
         switch (direction_char) {
