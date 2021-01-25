@@ -12,8 +12,8 @@ constexpr int lsb(int x) {
     return x & -x;
 }
 
-void update(int idx, int x) {
-    int dx = x - arr[idx];
+void update(int idx, bigInt x) {
+    bigInt dx = x - arr[idx];
     
     arr[idx] += dx;
     while (idx <= n) {
@@ -51,7 +51,8 @@ int main()
         }
     }
     
-    int a, b, c;
+    int a, b;
+    bigInt c;
     for (int i=0; i<m+k; ++i) {
         cin >> a >> b >> c;
         if (a == 1) update(b, c);
