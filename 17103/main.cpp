@@ -7,7 +7,7 @@ using namespace std;
 constexpr int MAX = 1'000'000;
 int num_queries, n;
 vector<bool> is_prime;
-vector<int> odd_prime_numbers;
+vector<int> prime_numbers;
 
 int main()
 {
@@ -15,16 +15,19 @@ int main()
     
     is_prime.assign(MAX + 1, false);
     
+    prime_numbers.push_back(2);
+    is_prime[2] = true;
+    
     for (int i=3; i<=MAX; i+=2) {
         is_prime[i] = true;
-        for (int p : odd_prime_numbers) {
+        for (int p : prime_numbers) {
             if (p > sqrt(i)) break;
             if (i % p == 0) {
                 is_prime[i] = false;
                 break;
             }
         }
-        if (is_prime[i]) odd_prime_numbers.push_back(i);
+        if (is_prime[i]) prime_numbers.push_back(i);
     }
     
     cin >> num_queries;
@@ -33,7 +36,7 @@ int main()
         cin >> n;
         
         int num_goldbach_partitions = 0;
-        for (int p : odd_prime_numbers) {
+        for (int p : prime_numbers) {
             if (p > n/2) break;
             if (is_prime[n-p]) ++num_goldbach_partitions;
         }
