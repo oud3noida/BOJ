@@ -146,15 +146,9 @@ double answer() {
     double ret = 0;
     
     for (int i=0; i<intersections.size(); ++i) {
-        double area_triangle = 0;
-        if (i == 0) {
-            area_triangle = 0.5 * intersections[intersections.size() - 1].cross(intersections[i]);
-        } else {
-            area_triangle = 0.5 * intersections[i-1].cross(intersections[i]);
-        }
-        
-        if (area_triangle < 0) continue;
-        ret += area_triangle;
+        Vector2 v1 = intersections[i],
+                v2 = intersections[(i+1) % intersections.size()];
+        ret += 0.5 * v1.cross(v2);
     }
     
     return ret / (MAX*MAX);
