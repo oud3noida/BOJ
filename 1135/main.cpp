@@ -4,7 +4,6 @@
 
 using namespace std;
 
-constexpr int INF = 100;
 int n;
 vector<int> parent, cache;
 vector<vector<int>> children;
