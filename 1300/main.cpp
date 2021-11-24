@@ -1,15 +1,11 @@
 #include <iostream>
-#include <vector>
 
 using namespace std;
 
 long long n, k;
 
 int main()
-{
-    ios_base::sync_with_stdio(false);
-    cin.tie(nullptr);
-    
+{    
     cin >> n >> k;
     
     long long left = 1, right = n * n;
